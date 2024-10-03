@@ -40,6 +40,18 @@
             display: none;
             margin-top: 20px;
         }
+        #session-log {
+            margin-top: 20px;
+            width: 80%;
+            border: 1px solid #ccc;
+            padding: 10px;
+            background-color: #fff;
+        }
+        .session-entry {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+        }
     </style>
 </head>
 <body>
@@ -70,17 +82,30 @@
         <option value="no">No</option>
     </select>
 
+    <label for="comments">Comments:</label>
+    <textarea id="comments" rows="4" cols="50" placeholder="Add any notes or comments..."></textarea>
+
+    <button id="save-session" onclick="saveSession()">Save Session</button>
+
+    <div id="session-log">
+        <h2>Session Log</h2>
+        <div id="log-entries"></div>
+    </div>
+
     <img id="retry" src="retry.png" alt="Try Again">
 
     <button id="reset-button" onclick="resetApp()">Try Again</button>
-    <button id="export-log" onclick="exportLog()">Export Log</button>
+    <button id="export-log" onclick="exportLog()">Export All Sessions</button>
 
     <script>
         const images = document.querySelectorAll('#image-container img');
         const retryImg = document.getElementById('retry');
         const resetButton = document.getElementById('reset-button');
         const correctActivity = document.getElementById('activity-select');
+        const goalSelect = document.getElementById('goal-select');
         const independenceSelect = document.getElementById('independence-select');
+        const commentsField = document.getElementById('comments');
+        const logEntries = document.getElementById('log-entries');
         const log = [];
 
         images.forEach(image => {
@@ -92,33 +117,39 @@
         function checkSelection(selectedId) {
             const correctId = correctActivity.value;
             const independence = independenceSelect.value;
+            const goal = goalSelect.value;
+            const comments = commentsField.value.trim();
             const logEntry = {
                 time: new Date().toLocaleString(),
                 selectedActivity: selectedId,
                 correctActivity: correctId,
-                independence: independence
+                independence: independence,
+                goal: goal,
+                comments: comments,
+                result: selectedId === correctId ? 'Correct' : 'Incorrect'
             };
-
-            if (selectedId === correctId) {
-                expandImage(document.getElementById(selectedId));
-                logEntry.result = 'Correct';
-            } else {
-                showRetryScreen();
-                logEntry.result = 'Incorrect';
-            }
 
             log.push(logEntry);
         }
 
-        function expandImage(image) {
-            image.classList.add('full-screen');
-            resetButton.style.display = 'block';
-        }
+        function saveSession() {
+            const correctId = correctActivity.value;
+            const goal = goalSelect.value;
+            const independence = independenceSelect.value;
+            const comments = commentsField.value.trim();
 
-        function showRetryScreen() {
-            document.getElementById('image-container').style.display = 'none';
-            retryImg.style.display = 'block';
-            resetButton.style.display = 'block';
+            const logEntryHtml = `
+                <div class="session-entry">
+                    <strong>Time:</strong> ${new Date().toLocaleString()}<br>
+                    <strong>Selected Activity:</strong> ${correctId}<br>
+                    <strong>Goal:</strong> ${goal}<br>
+                    <strong>Independence:</strong> ${independence}<br>
+                    <strong>Comments:</strong> ${comments || 'None'}<br>
+                    <strong>Result:</strong> ${correctId === correctActivity.value ? 'Correct' : 'Incorrect'}
+                </div>
+            `;
+            logEntries.insertAdjacentHTML('beforeend', logEntryHtml);
+            commentsField.value = ''; // Clear comments after saving
         }
 
         function resetApp() {
@@ -132,23 +163,21 @@
         }
 
         function exportLog() {
-    let logContent = "IEP Goal Tracking Log\n";
-    logContent += "Date and Time, Selected Activity, Correct Activity, Independence, Result\n";
-    log.forEach(entry => {
-        logContent += `${entry.time}, ${entry.selectedActivity}, ${entry.correctActivity}, ${entry.independence}, ${entry.result}\n`;
-    });
+            let logContent = "IEP Goal Tracking Log\n";
+            logContent += "Date and Time, Selected Activity, Correct Activity, Independence, Goal, Comments, Result\n";
+            log.forEach(entry => {
+                logContent += `${entry.time}, ${entry.selectedActivity}, ${entry.correctActivity}, ${entry.independence}, ${entry.goal}, ${entry.comments}, ${entry.result}\n`;
+            });
 
-    // Get current date for the filename
-    const now = new Date();
-    const dateString = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+            const now = new Date();
+            const dateString = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
-    // Create file with date-stamped filename
-    const blob = new Blob([logContent], { type: 'text/plain' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `IEP_Goal_Tracking_Log_${dateString}.txt`; // Filename with date stamp
-    link.click();
-}
+            const blob = new Blob([logContent], { type: 'text/plain' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `IEP_Goal_Tracking_Log_${dateString}.txt`;
+            link.click();
+        }
     </script>
 
 </body>
