@@ -11,7 +11,7 @@
             box-sizing: border-box;
             font-family: Arial, sans-serif;
             background-color: #f0f0f0;
-            overflow-y: auto; /* Enable scrolling */
+            overflow-y: auto;
         }
         .container {
             display: flex;
@@ -143,7 +143,7 @@
             <div id="log-entries"></div>
         </div>
 
-        <img id="retry" src="retry.png" alt="Try Again">
+        <img id="retry" src="retry.png" alt="Try Again" class="full-screen">
 
         <button id="reset-button" onclick="resetApp()">Try Again</button>
         <button id="export-log" onclick="exportLog()">Export All Sessions</button>
@@ -159,6 +159,58 @@
         const commentsField = document.getElementById('comments');
         const logEntries = document.getElementById('log-entries');
         const log = [];
+        let fullScreenImage = null;
+
+        images.forEach(image => {
+            image.addEventListener('click', function() {
+                checkSelection(this.id);
+            });
+        });
+
+        function checkSelection(selectedId) {
+            const correctId = correctActivity.value;
+            const independence = independenceSelect.value;
+            const goal = goalSelect.value;
+            const comments = commentsField.value.trim();
+            const logEntry = {
+                time: new Date().toLocaleString(),
+                selectedActivity: selectedId,
+                correctActivity: correctId,
+                independence: independence,
+                goal: goal,
+                comments: comments,
+                result: selectedId === correctId ? 'Correct' : 'Incorrect'
+            };
+
+            log.push(logEntry);
+
+            if (selectedId === correctId) {
+                expandImage(document.getElementById(selectedId));
+            } else {
+                showRetryScreen();
+            }
+        }
+
+        function expandImage(image) {
+            fullScreenImage = image;
+            image.classList.add('full-screen');
+            resetButton.style.display = 'block';
+        }
+
+        function showRetryScreen() {
+            retryImg.style.display = 'block';
+            retryImg.classList.add('full-screen');
+            resetButton.style.display = 'block';
+        }
+
+        function resetApp() {
+            if (fullScreenImage) {
+                fullScreenImage.classList.remove('full-screen');
+            }
+            retryImg.style.display = 'none';
+            resetButton.style.display = 'none';
+            fullScreenImage = null;
+        }
 
         function saveSession() {
             const correctId = correctActivity.value;
@@ -178,22 +230,6 @@
             `;
             logEntries.insertAdjacentHTML('beforeend', logEntryHtml);
             commentsField.value = ''; // Clear comments after saving
-
-            const logEntry = {
-                time: new Date().toLocaleString(),
-                selectedActivity: correctId,
-                goal: goal,
-                independence: independence,
-                comments: comments,
-                result: correctId === correctActivity.value ? 'Correct' : 'Incorrect'
-            };
-            log.push(logEntry);
-        }
-
-        function resetApp() {
-            retryImg.style.display = 'none';
-            document.getElementById('image-container').style.display = 'grid';
-            resetButton.style.display = 'none';
         }
 
         function exportLog() {
