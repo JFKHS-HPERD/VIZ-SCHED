@@ -239,9 +239,9 @@
 
         function exportLog() {
             let logContent = "IEP Goal Tracking Log\n";
-            logContent += "Date and Time, Selected Activity, Goal, Independence, Comments, Result\n";
+            logContent += "Date and Time, Selected Activity, Correct Activity, Goal, Independence, Comments, Result\n";
             log.forEach(entry => {
-                logContent += `${entry.time}, ${entry.selectedActivity}, ${entry.goal}, ${entry.independence}, ${entry.comments}, ${entry.result}\n`;
+                logContent += `${entry.time}, ${entry.selectedActivity}, ${entry.correctActivity}, ${entry.goal}, ${entry.independence}, ${entry.comments || 'None'}, ${entry.result}\n`;
             });
 
             const now = new Date();
@@ -252,7 +252,7 @@
             link.href = URL.createObjectURL(blob);
             link.download = `IEP_Goal_Tracking_Log_${dateString}.txt`;
             link.click();
-        }
+      }
 
         function clearLog() {
             logEntries.innerHTML = '';
