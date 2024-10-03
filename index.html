@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visual Schedule</title>
+    <title>Visual Schedule with IEP Logging</title>
     <style>
         body {
             display: flex;
@@ -44,8 +44,6 @@
 </head>
 <body>
 
-    <h1>Hi Mac!</h1>
-    <br><br>
     <h1>Select the Correct Activity</h1>
 
     <label for="activity-select">Choose the correct activity:</label>
@@ -53,7 +51,6 @@
         <option value="warmup">Warm Up</option>
         <option value="walk">Walk</option>
         <option value="classroom">Classroom</option>
-        <option value="gym">Gym</option>
         <option value="bus">Bus</option>
     </select>
 
@@ -61,19 +58,27 @@
         <img src="warmup.png" id="warmup" alt="Warm Up">
         <img src="walk.png" id="walk" alt="Walk">
         <img src="classroom.png" id="classroom" alt="Classroom">
-        <img src="gym.png" id="gym" alt="Gym">
         <img src="bus.png" id="bus" alt="Bus">
     </div>
+
+    <label for="independence-select">Did the student act independently?</label>
+    <select id="independence-select">
+        <option value="yes">Yes</option>
+        <option value="no">No</option>
+    </select>
 
     <img id="retry" src="retry.png" alt="Try Again">
 
     <button id="reset-button" onclick="resetApp()">Try Again</button>
+    <button id="export-log" onclick="exportLog()">Export Log</button>
 
     <script>
         const images = document.querySelectorAll('#image-container img');
         const retryImg = document.getElementById('retry');
         const resetButton = document.getElementById('reset-button');
         const correctActivity = document.getElementById('activity-select');
+        const independenceSelect = document.getElementById('independence-select');
+        const log = [];
 
         images.forEach(image => {
             image.addEventListener('click', function() {
@@ -83,12 +88,23 @@
 
         function checkSelection(selectedId) {
             const correctId = correctActivity.value;
+            const independence = independenceSelect.value;
+            const logEntry = {
+                time: new Date().toLocaleString(),
+                selectedActivity: selectedId,
+                correctActivity: correctId,
+                independence: independence
+            };
 
             if (selectedId === correctId) {
                 expandImage(document.getElementById(selectedId));
+                logEntry.result = 'Correct';
             } else {
                 showRetryScreen();
+                logEntry.result = 'Incorrect';
             }
+
+            log.push(logEntry);
         }
 
         function expandImage(image) {
@@ -111,6 +127,25 @@
                 image.classList.remove('full-screen');
             });
         }
+
+        function exportLog() {
+    let logContent = "IEP Goal Tracking Log\n";
+    logContent += "Date and Time, Selected Activity, Correct Activity, Independence, Result\n";
+    log.forEach(entry => {
+        logContent += `${entry.time}, ${entry.selectedActivity}, ${entry.correctActivity}, ${entry.independence}, ${entry.result}\n`;
+    });
+
+    // Get current date for the filename
+    const now = new Date();
+    const dateString = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+    // Create file with date-stamped filename
+    const blob = new Blob([logContent], { type: 'text/plain' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `IEP_Goal_Tracking_Log_${dateString}.txt`; // Filename with date stamp
+    link.click();
+}
     </script>
 
 </body>
