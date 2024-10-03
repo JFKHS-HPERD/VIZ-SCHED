@@ -10,19 +10,57 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            margin: 0;
+            padding: 10px;
+            box-sizing: border-box;
             height: 100vh;
             background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+        h1, h2 {
+            text-align: center;
+            font-size: 1.5em;
+        }
+        label {
+            margin-top: 10px;
+            font-size: 1em;
+        }
+        select, textarea, button {
+            width: 100%;
+            max-width: 600px;
+            font-size: 1em;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        textarea {
+            height: 100px;
+            resize: none;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        button:hover {
+            background-color: #45a049;
         }
         #image-container {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 20px;
-            margin-bottom: 20px;
+            margin: 20px 0;
+            width: 100%;
+            max-width: 600px;
         }
         img {
-            width: 150px;
-            height: 150px;
+            width: 100%;
+            height: auto;
             cursor: pointer;
+            border: 1px solid #ccc;
+            border-radius: 10px;
         }
         .full-screen {
             position: fixed;
@@ -36,16 +74,19 @@
         #retry {
             display: none;
         }
-        #reset-button {
-            display: none;
-            margin-top: 20px;
+        #reset-button, #export-log, #save-session {
+            width: 100%;
+            max-width: 600px;
         }
         #session-log {
             margin-top: 20px;
-            width: 80%;
+            width: 100%;
+            max-width: 600px;
             border: 1px solid #ccc;
             padding: 10px;
             background-color: #fff;
+            overflow-y: auto;
+            max-height: 300px;
         }
         .session-entry {
             margin-bottom: 10px;
@@ -83,7 +124,7 @@
     </select>
 
     <label for="comments">Comments:</label>
-    <textarea id="comments" rows="4" cols="50" placeholder="Add any notes or comments..."></textarea>
+    <textarea id="comments" placeholder="Add any notes or comments..."></textarea>
 
     <button id="save-session" onclick="saveSession()">Save Session</button>
 
@@ -108,30 +149,6 @@
         const logEntries = document.getElementById('log-entries');
         const log = [];
 
-        images.forEach(image => {
-            image.addEventListener('click', function() {
-                checkSelection(this.id);
-            });
-        });
-
-        function checkSelection(selectedId) {
-            const correctId = correctActivity.value;
-            const independence = independenceSelect.value;
-            const goal = goalSelect.value;
-            const comments = commentsField.value.trim();
-            const logEntry = {
-                time: new Date().toLocaleString(),
-                selectedActivity: selectedId,
-                correctActivity: correctId,
-                independence: independence,
-                goal: goal,
-                comments: comments,
-                result: selectedId === correctId ? 'Correct' : 'Incorrect'
-            };
-
-            log.push(logEntry);
-        }
-
         function saveSession() {
             const correctId = correctActivity.value;
             const goal = goalSelect.value;
@@ -150,23 +167,29 @@
             `;
             logEntries.insertAdjacentHTML('beforeend', logEntryHtml);
             commentsField.value = ''; // Clear comments after saving
+
+            const logEntry = {
+                time: new Date().toLocaleString(),
+                selectedActivity: correctId,
+                goal: goal,
+                independence: independence,
+                comments: comments,
+                result: correctId === correctActivity.value ? 'Correct' : 'Incorrect'
+            };
+            log.push(logEntry);
         }
 
         function resetApp() {
             retryImg.style.display = 'none';
             document.getElementById('image-container').style.display = 'grid';
             resetButton.style.display = 'none';
-
-            images.forEach(image => {
-                image.classList.remove('full-screen');
-            });
         }
 
         function exportLog() {
             let logContent = "IEP Goal Tracking Log\n";
-            logContent += "Date and Time, Selected Activity, Correct Activity, Independence, Goal, Comments, Result\n";
+            logContent += "Date and Time, Selected Activity, Goal, Independence, Comments, Result\n";
             log.forEach(entry => {
-                logContent += `${entry.time}, ${entry.selectedActivity}, ${entry.correctActivity}, ${entry.independence}, ${entry.goal}, ${entry.comments}, ${entry.result}\n`;
+                logContent += `${entry.time}, ${entry.selectedActivity}, ${entry.goal}, ${entry.independence}, ${entry.comments}, ${entry.result}\n`;
             });
 
             const now = new Date();
