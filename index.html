@@ -75,11 +75,12 @@
             height: 100vh;
             object-fit: contain;
             background-color: white;
+            z-index: 1000;
         }
         #retry {
             display: none;
         }
-        #reset-button, #export-log, #save-session {
+        #reset-button, #export-log, #save-session, #clear-log {
             width: 100%;
         }
         #session-log {
@@ -145,8 +146,9 @@
 
         <img id="retry" src="retry.png" alt="Try Again" class="full-screen">
 
-        <button id="reset-button" onclick="resetApp()">Try Again</button>
+        <button id="reset-button" onclick="resetApp()" style="display:none;">Try Again</button>
         <button id="export-log" onclick="exportLog()">Export All Sessions</button>
+        <button id="clear-log" onclick="clearLog()">Clear Log</button>
     </div>
 
     <script>
@@ -194,20 +196,23 @@
         function expandImage(image) {
             fullScreenImage = image;
             image.classList.add('full-screen');
-            resetButton.style.display = 'block';
+            image.addEventListener('click', resetApp); // Return to main screen by tapping the image
         }
 
         function showRetryScreen() {
             retryImg.style.display = 'block';
             retryImg.classList.add('full-screen');
-            resetButton.style.display = 'block';
+            retryImg.addEventListener('click', resetApp); // Return to main screen by tapping the retry image
         }
 
         function resetApp() {
             if (fullScreenImage) {
                 fullScreenImage.classList.remove('full-screen');
+                fullScreenImage.removeEventListener('click', resetApp);
             }
             retryImg.style.display = 'none';
+            retryImg.classList.remove('full-screen');
+            retryImg.removeEventListener('click', resetApp);
             resetButton.style.display = 'none';
             fullScreenImage = null;
         }
@@ -247,6 +252,11 @@
             link.href = URL.createObjectURL(blob);
             link.download = `IEP_Goal_Tracking_Log_${dateString}.txt`;
             link.click();
+        }
+
+        function clearLog() {
+            logEntries.innerHTML = '';
+            log.length = 0; // Clear the array
         }
     </script>
 
