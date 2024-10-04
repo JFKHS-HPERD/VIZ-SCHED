@@ -218,24 +218,31 @@
         }
 
         function saveSession() {
-            const correctId = correctActivity.value;
-            const goal = goalSelect.value;
-            const independence = independenceSelect.value;
-            const comments = commentsField.value.trim();
+    const correctId = correctActivity.value; // Dropdown selected activity
+    const goal = goalSelect.value;
+    const independence = independenceSelect.value;
+    const comments = commentsField.value.trim();
+    
+    // Find the last selected image for comparison
+    const lastLogEntry = log[log.length - 1]; 
+    const selectedActivity = lastLogEntry ? lastLogEntry.selectedActivity : correctId;
+    
+    const result = selectedActivity === correctId ? 'Correct' : 'Incorrect'; // Check if the selected image matches
+    
+    const logEntryHtml = `
+        <div class="session-entry">
+            <strong>Time:</strong> ${new Date().toLocaleString()}<br>
+            <strong>Selected Activity:</strong> ${selectedActivity}<br>
+            <strong>Goal:</strong> ${goal}<br>
+            <strong>Independence:</strong> ${independence}<br>
+            <strong>Comments:</strong> ${comments || 'None'}<br>
+            <strong>Result:</strong> ${result}
+        </div>
+    `;
+    logEntries.insertAdjacentHTML('beforeend', logEntryHtml);
+    commentsField.value = ''; // Clear comments after saving
+}
 
-            const logEntryHtml = `
-                <div class="session-entry">
-                    <strong>Time:</strong> ${new Date().toLocaleString()}<br>
-                    <strong>Selected Activity:</strong> ${correctId}<br>
-                    <strong>Goal:</strong> ${goal}<br>
-                    <strong>Independence:</strong> ${independence}<br>
-                    <strong>Comments:</strong> ${comments || 'None'}<br>
-                    <strong>Result:</strong> ${correctId === correctActivity.value ? 'Correct' : 'Incorrect'}
-                </div>
-            `;
-            logEntries.insertAdjacentHTML('beforeend', logEntryHtml);
-            commentsField.value = ''; // Clear comments after saving
-        }
 
         function exportLog() {
             let logContent = "IEP Goal Tracking Log\n";
